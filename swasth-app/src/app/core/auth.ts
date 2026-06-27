@@ -7,7 +7,7 @@ import { UserService } from './user.service';
   providedIn: 'root',
 })
 export class Auth {
-  private apiUrl = 'http://localhost:3000';
+  private apiUrl = 'https://swasth-healthcare-chatbot.onrender.com';
 
   constructor(
     private http:        HttpClient,

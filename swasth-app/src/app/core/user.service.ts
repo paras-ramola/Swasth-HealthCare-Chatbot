@@ -14,7 +14,7 @@ export interface UserProfile {
 @Injectable({ providedIn: 'root' })
 export class UserService {
 
-  private apiUrl = 'http://localhost:3000';
+  private apiUrl = 'https://swasth-healthcare-chatbot.onrender.com';
 
   // in-memory cache — cleared on logout
   private _profile$ = new BehaviorSubject<UserProfile | null>(null);
