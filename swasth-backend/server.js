@@ -1,13 +1,15 @@
+require("dotenv").config();
+
 const express = require("express");
-const cors    = require("cors");
-const pool    = require("./db");
-const bcrypt  = require("bcrypt");
-const jwt     = require("jsonwebtoken");
+const cors = require("cors");
+const pool = require("./db");
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 const chatRoutes = require("./routes/chatRoutes");
 
 // JWT secret — set JWT_SECRET in your .env (or environment) for production.
 // Never commit a real secret to source control.
-const JWT_SECRET = process.env.JWT_SECRET || 'swasth_dev_secret_change_in_prod';
+const JWT_SECRET = process.env.JWT_SECRET || "swasth_dev_secret_change_in_prod";
 
 const app = express();
 app.use(cors());
@@ -16,7 +18,6 @@ app.use("/api", chatRoutes);
 
 async function createTables() {
   try {
-
     await pool.query(`
       CREATE TABLE IF NOT EXISTS users (
         id         SERIAL PRIMARY KEY,
@@ -131,7 +132,6 @@ async function createTables() {
     `);
 
     console.log("Assessment tables ready");
-
   } catch (err) {
     console.error("Table creation error:", err);
   }
@@ -145,7 +145,7 @@ app.post("/register", async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
     await pool.query(
       "INSERT INTO users (email, password, age, gender, address) VALUES ($1, $2, $3, $4, $5)",
-      [email, hashedPassword, age, gender, address]
+      [email, hashedPassword, age, gender, address],
     );
     res.json({ message: "User registered successfully" });
   } catch (err) {
@@ -155,7 +155,9 @@ app.post("/register", async (req, res) => {
 
 app.post("/login", async (req, res) => {
   const { email, password } = req.body;
-  const result = await pool.query("SELECT * FROM users WHERE email = $1", [email]);
+  const result = await pool.query("SELECT * FROM users WHERE email = $1", [
+    email,
+  ]);
   if (result.rows.length === 0) {
     return res.status(400).json({ error: "User not found" });
   }
@@ -168,7 +170,6 @@ app.post("/login", async (req, res) => {
   res.json({ token });
 });
 
-
 // ── GET /me — returns logged-in user's profile ────────────────────────────────
 const verifyToken = require("./middleware/authMiddleware");
 
@@ -179,7 +180,7 @@ app.get("/me", verifyToken, async (req, res) => {
 
     const result = await pool.query(
       "SELECT id, email, age, gender, address FROM users WHERE id = $1",
-      [userId]
+      [userId],
     );
 
     if (result.rows.length === 0) {
@@ -188,12 +189,12 @@ app.get("/me", verifyToken, async (req, res) => {
 
     const user = result.rows[0];
     return res.json({
-      id:       user.id,
-      email:    user.email,
-      fullName: user.email.split("@")[0],   // derive display name from email until fullName column exists
-      age:      user.age,
-      gender:   user.gender,
-      address:  user.address
+      id: user.id,
+      email: user.email,
+      fullName: user.email.split("@")[0], // derive display name from email until fullName column exists
+      age: user.age,
+      gender: user.gender,
+      address: user.address,
     });
   } catch (err) {
     console.error("GET /me error:", err);
