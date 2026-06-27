@@ -52,7 +52,7 @@ export class Register {
 
     const userData = {
       fullName: this.fullName,
-      age: this.age,
+      age: Number(this.age),
       gender: this.gender,
       address: this.address,
       email: this.email,
