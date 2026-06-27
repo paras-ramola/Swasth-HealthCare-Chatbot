@@ -15,6 +15,7 @@ const app = express();
 
 // ---------------- MIDDLEWARE ----------------
 
+// ✅ FIXED CORS (important for Angular + Vercel)
 app.use(
   cors({
     origin: "*", // change to your Vercel URL later for production
@@ -28,7 +29,7 @@ app.use("/api", chatRoutes);
 app.get("/", (req, res) => {
   res.json({
     status: "ok",
-    message: "Swasth backend is running ",
+    message: "Swasth backend is running 🚀",
   });
 });
 
