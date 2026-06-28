@@ -83,7 +83,7 @@ db.sqlite3
 *.swo
 
 
-*.csv
+
 
 Datasets
 swasth-ml-services/models/
