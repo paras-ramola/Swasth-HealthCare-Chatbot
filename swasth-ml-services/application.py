@@ -3,6 +3,7 @@
 # FLASK ML SERVICE
 # =============================================================================
 
+
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 
@@ -11,7 +12,6 @@ import pickle
 import os
 import json
 import re
-from concurrent.futures import ThreadPoolExecutor
 
 from catboost import CatBoostClassifier
 from sentence_transformers import SentenceTransformer
@@ -20,7 +20,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 from nlp.openai_client import call_openai
 from nlp.emergency_detection import detect_emergency
 from nlp.recommendations_engine import generate_recommendations
-from nlp.question_engine  import (
+from nlp.question_engine import (
     search_symptoms_by_text,
     get_next_symptom_to_ask,
     format_question_with_llm,
@@ -29,23 +29,43 @@ from nlp.question_engine  import (
     MAX_QUESTIONS
 )
 
-app      = Flask(__name__)
-CORS(app)
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+#  IMPORTANT: import your downloader
+from download_models import download_all_models
 
+
+
+# =============================================================================
+# APP INIT
+# =============================================================================
+
+app = Flask(__name__)
+CORS(app)
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+MODEL_DIR = os.path.join(BASE_DIR, "models")
+
+os.makedirs(MODEL_DIR, exist_ok=True)
+
+
+# =============================================================================
+# DOWNLOAD MODELS (ONLY ONCE PER STARTUP)
+# =============================================================================
+
+download_all_models()
 
 # =============================================================================
 # LOAD MODEL ARTIFACTS
 # =============================================================================
 
 model = CatBoostClassifier()
-model.load_model(os.path.join(BASE_DIR, "models/disease_prediction_model.cbm"))
+model.load_model(os.path.join(MODEL_DIR, "disease_prediction_model.cbm"))
 
 symptom_columns = pickle.load(
-    open(os.path.join(BASE_DIR, "models/symptom_columns.pkl"), "rb")
+    open(os.path.join(MODEL_DIR, "symptom_columns.pkl"), "rb")
 )
+
 disease_classes = pickle.load(
-    open(os.path.join(BASE_DIR, "models/disease_classes.pkl"), "rb")
+    open(os.path.join(MODEL_DIR, "disease_classes.pkl"), "rb")
 )
 
 
@@ -700,4 +720,5 @@ def health():
 
 
 if __name__ == "__main__":
-    app.run(debug=True, port=5001)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
